@@ -1,28 +1,27 @@
 const Doctor = require('../../../models/doctor');
-// const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
 // For login
-module.exports.login = async function(req, res) {
-    try {
-        // Find the doctor from the db
-        const doctor = await Doctor.findOne({ username: req.body.username });
-
-        // Check the authentication
-        if (!doctor || doctor.password != req.body.password){
-            return res.json(422,{message: 'invalid username or password'});
+module.exports.createSession = async function(req,res){
+    try{
+        let user = await Doctor.findOne({username: req.body.username});
+        if (!user || user.password != req.body.password){
+            return res.json(422,{
+                message: 'Invalid username or password'
+            });
         }
 
-        //incomplete
         return res.json(200,{
-            message: ' Doctor logged in successfully', 
+            message: 'Sign in successful, here is your token',
             data: {
-                token: jwt.sign(doctor.toJSON(),)
+                token: jwt.sign(user.toJSON(),'apiHospital',{expiresIn: '1000000'})
             }
         })
-
-    } catch(err) {
-        console.log('Error in creating the JWT token: ', err);
-        return res.status(500).json({ message: 'Internal Error' });
+    }catch(err){
+        console.log('error',err);
+        return res.json(500,{
+            message: 'Internal server error'
+        });
     }
 }
 
